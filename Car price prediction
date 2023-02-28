@@ -1,0 +1,187 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+
+df = pd.read_csv('/kaggle/input/carprice/CarPrice.csv')
+
+pd.set_option('display.max_columns',None)
+pd.set_option('display.max_rows',None)
+df.shape
+
+df.sample(5)
+
+df[df.duplicated()]
+
+df.info()
+
+df.isnull().sum()
+
+df.describe()
+
+df.corr()['price']
+
+df.sample(5)
+
+df['Company Name']  = df['CarName'].apply(lambda x : x.split()[0])
+df.drop('CarName',axis = 1, inplace= True)
+df.head()
+
+df['Company Name'].unique()
+
+def replace(error,correct):
+    df['Company Name'] = df['Company Name'].replace(to_replace=error,value=correct)
+replace('maxda','mazda')
+replace('porcshce','porsche')
+replace('Nissan','nissan')
+replace('vw','volkswagen')
+replace('vokswagen','volkswagen')
+replace('toyouta','toyota')
+df['Company Name'].unique()
+
+df.columns
+
+df.sample(5)
+
+plt.figure(figsize=(20, 6))
+
+plt.subplot(2,2,1)
+plt1 = sns.countplot(x='Company Name',data = df)
+plt.title('Companies Countplot')
+ax = plt.gca()
+ax.tick_params(axis='x', labelrotation = 45)
+plt.subplot(2,2,2)
+plt2 = sns.countplot(x='fueltype',data = df)
+
+plt.figure(figsize = (12,5))
+plt.subplot(1,2,1)
+df.groupby('Company Name').mean()['price'].sort_values().plot(kind = 'bar')
+
+plt.subplot(1,2,2)
+sns.boxplot(x='price',data = df)
+
+plt.figure(figsize=(20, 8))
+
+plt.subplot(2,2,1)
+sns.countplot(x='symboling',data = df)
+plt.title('Symboling Countplot')
+
+plt.subplot(2,2,3)
+sns.countplot(x='aspiration',data = df)
+ax = plt.gca()
+ax.tick_params(axis='x', labelrotation = 45)
+
+plt.subplot(2,2,2)
+plt1 = sns.boxplot(x='symboling',y='price',data = df)
+
+plt.subplot(2,2,4)
+plt2 = sns.boxplot(x='aspiration',y='price',data = df)
+ax = plt.gca()
+ax.tick_params(axis='x', labelrotation = 45)
+
+plt.figure(figsize = (20,5))
+sns.boxplot(x='Company Name',y = 'price',data = df)
+
+df['price'].describe()
+
+plt.figure(figsize=(13, 13))
+
+plt.subplot(4,2,1)
+sns.countplot(x='drivewheel',data = df)
+plt.subplot(4,2,2)
+sns.boxplot(x='drivewheel',y='price',data = df)
+plt.subplot(4,2,3)
+sns.countplot(x='enginetype',data = df)
+
+plt.subplot(4,2,4)
+sns.boxplot(x='enginetype',y='price',data = df)
+
+plt.subplot(4,2,5)
+sns.countplot(x='fuelsystem',data = df)
+plt.subplot(4,2,6)
+plt1 = sns.boxplot(x='fuelsystem',y='price',data = df)
+
+plt.figure(figsize = (12,5))
+plt.subplot(1,2,1)
+sns.countplot(x='enginelocation',data = df)
+plt.subplot(1,2,2)
+sns.boxplot(x='enginelocation',y='price',data = df)
+
+df.corr()['price'].index
+
+df.corr()['price']
+
+sns.pairplot(x_vars = ['wheelbase','carwidth','carlength','horsepower'],y_vars = ['price'],data = df)
+sns.pairplot(x_vars = ['carheight','curbweight','enginesize','peakrpm'],y_vars = ['price'],data = df)
+sns.pairplot(x_vars = ['boreratio','stroke','compressionratio','citympg'],y_vars = ['price'],data = df)
+
+plt.figure(figsize = (12,5))
+sns.heatmap(df.corr(),annot = True)
+
+imp = df[['carwidth','curbweight','enginesize','boreratio','horsepower','highwaympg','citympg','wheelbase']]
+imp.corr()
+
+imp = imp.drop('citympg',axis = 1)
+num_imp_cols = imp.columns
+num_imp_cols
+
+imp = imp.drop('citympg',axis = 1)
+num_imp_cols = imp.columns
+num_imp_cols
+
+df.corr()['price']
+
+num_imp_cols.append('cylindernumber')
+num_imp_cols.append('price')
+
+fueltype = pd.get_dummies(df['fueltype'],drop_first=True)
+aspiration = pd.get_dummies(df['aspiration'],drop_first=True)
+carbody = pd.get_dummies(df['carbody'],drop_first=True)
+drivewheel = pd.get_dummies(df['drivewheel'],drop_first=True)
+enginelocation = pd.get_dummies(df['enginelocation'],drop_first=True)
+fuelsystem = pd.get_dummies(df['fuelsystem'],drop_first=True)
+CompanyName = pd.get_dummies(df['Company Name'],drop_first=True)
+enginetype = pd.get_dummies(df['enginetype'],drop_first=True)
+df= df[num_imp_cols]
+df.head()
+
+df = pd.concat([df,fueltype,aspiration,carbody,drivewheel,enginelocation,fuelsystem,enginetype,CompanyName],axis = 1)
+df.head()
+
+from sklearn.model_selection import train_test_split
+X = df.drop('price',axis = 1)
+y = df['price']
+from sklearn.model_selection import train_test_split
+
+np.random.seed(0)
+df_train, df_test = train_test_split(df, train_size = 0.7, test_size = 0.3, random_state = 100)
+df_train.shape
+df_test.shape
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
+scaler = StandardScaler()
+df_train.head()
+X_train,y_train = df_train.drop('price',axis = 1),df_train['price']
+df_test.head()
+X_test = df_test.drop('price',axis = 1)
+y_test = df_test['price']
+Tuning the svm model
+
+param_grid = {'C': [0.1,1, 10, 100, 1000], 'gamma': [1,0.1,0.01,0.001,0.0001], 'kernel': ['rbf']} 
+from sklearn.model_selection import GridSearchCV
+grid = GridSearchCV(SVR(),param_grid,refit=True,verbose=3)
+
+grid.fit(X_train,y_train)
+y_pred = grid.predict(X_test)
+#Residual Analysis
+fig = plt.figure()
+sns.displot((y_test - y_pred),bins = 30,kde= True)
+fig.suptitle('Error Terms')       
+plt.xlabel('Errors')   
+#EVALUATION OF THE MODEL
+fig = plt.figure()
+plt.scatter(y_test,y_pred)
+fig.suptitle('y_test vs y_pred', fontsize=20)          
+plt.xlabel('y_test')                        
+plt.ylabel('y_pred') 
+
